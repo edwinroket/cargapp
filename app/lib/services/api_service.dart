@@ -50,6 +50,17 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  // PUT
+  static Future<dynamic> put(String url, Map<String, dynamic> body) async {
+    final headers  = await getHeaders();
+    final response = await http.put(
+      Uri.parse(url),
+      headers: headers,
+      body   : jsonEncode(body),
+    );
+    return _handleResponse(response);
+  }
+
   // DELETE
   static Future<dynamic> delete(String url) async {
     final headers  = await getHeaders();

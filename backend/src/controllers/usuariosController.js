@@ -39,7 +39,9 @@ const registro = async (req, res) => {
         id: result.insertId,
         email,
         nombre_completo: nombre_completo || null,
-        es_premium: false
+        telefono: telefono || null,
+        es_premium: false,
+        reputacion: 0
       }
     })
 
@@ -90,6 +92,7 @@ const login = async (req, res) => {
         id       : usuario.id,
         email    : usuario.email,
         nombre   : usuario.nombre_completo,
+        telefono : usuario.telefono,
         premium  : usuario.es_premium,
         reputacion: usuario.puntos_reputacion
       }
@@ -115,4 +118,41 @@ const getPerfil = async (req, res) => {
   }
 }
 
-module.exports = { registro, login, getPerfil }
+const actualizarPerfil = async (req, res) => {
+  const { nombre_completo, telefono } = req.body
+
+  if (nombre_completo == null && telefono == null) {
+    return res.status(400).json({ error: 'No hay datos para actualizar' })
+  }
+
+  const updates = []
+  const params = []
+
+  if (nombre_completo !== null) {
+    updates.push('nombre_completo = ?')
+    params.push(nombre_completo || null)
+  }
+
+  if (telefono !== null) {
+    updates.push('telefono = ?')
+    params.push(telefono || null)
+  }
+
+  params.push(req.usuarioId)
+
+  try {
+    await pool.query(`UPDATE usuarios SET ${updates.join(', ')} WHERE id = ?`, params)
+
+    const [rows] = await pool.query(
+      `SELECT id, email, nombre_completo, telefono, puntos_reputacion, es_premium FROM usuarios WHERE id = ?`,
+      [req.usuarioId]
+    )
+
+    res.json(rows[0])
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Error al actualizar perfil' })
+  }
+}
+
+module.exports = { registro, login, getPerfil, actualizarPerfil }

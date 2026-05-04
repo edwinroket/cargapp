@@ -56,11 +56,19 @@ const getVehiculos = async (req, res) => {
   try {
     const [rows] = await pool.query(`
       SELECT 
-        v.id, v.alias, v.marca_manual, v.modelo_manual, v.anio_manual,
-        v.rendimiento_km_l, v.es_principal, v.creado_en,
+        v.id,
+        v.alias,
+        v.marca_manual,
+        v.modelo_manual,
+        v.anio_manual,
+        v.rendimiento_km_l,
+        v.es_principal,
+        v.creado_en,
         tc.nombre AS combustible,
-        vm.marca AS marca_oficial, vm.modelo AS modelo_oficial, vm.anio,
-        vm.official_efficiency AS rendimiento_oficial
+        vm.marca AS marca_oficial,
+        vm.modelo AS modelo_oficial,
+        vm.anio AS anio_oficial,
+        vm.rendimiento_oficial AS rendimiento_oficial
       FROM vehiculos v
       JOIN tipos_combustible tc ON tc.id = v.tipo_combustible_id
       LEFT JOIN modelos_vehiculo vm ON vm.id = v.modelo_id
@@ -68,7 +76,30 @@ const getVehiculos = async (req, res) => {
       ORDER BY v.es_principal DESC, v.creado_en DESC
     `, [req.usuarioId])
 
-    res.json(rows)
+    const formatted = rows.map((vehiculo) => ({
+      id               : vehiculo.id,
+      alias            : vehiculo.alias,
+      marca_manual     : vehiculo.marca_manual,
+      modelo_manual    : vehiculo.modelo_manual,
+      anio_manual      : vehiculo.anio_manual,
+      marca_oficial    : vehiculo.marca_oficial,
+      modelo_oficial   : vehiculo.modelo_oficial,
+      anio_oficial     : vehiculo.anio_oficial,
+      rendimiento_km_l : vehiculo.rendimiento_km_l,
+      rendimiento_oficial: vehiculo.rendimiento_oficial,
+      tipo_combustible : vehiculo.combustible,
+      es_principal     : Boolean(vehiculo.es_principal),
+      creado_en        : vehiculo.creado_en,
+      nombre_mostrado  : vehiculo.alias
+                         || ' - '
+                         || (vehiculo.marca_manual || vehiculo.marca_oficial || 'Marca')
+                         || ' '
+                         || (vehiculo.modelo_manual || vehiculo.modelo_oficial || 'Modelo')
+                         || ' '
+                         || (vehiculo.anio_manual || vehiculo.anio_oficial || ''),
+    }))
+
+    res.json(formatted)
   } catch (err) {
     res.status(500).json({ error: 'Error al obtener vehículos' })
   }
@@ -144,4 +175,116 @@ const calcularCosto = async (req, res) => {
   }
 }
 
-module.exports = { crearVehiculo, getVehiculos, eliminarVehiculo, calcularCosto }
+const getVehiculo = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT 
+         v.id, v.alias, v.marca_manual, v.modelo_manual, v.anio_manual,
+         v.rendimiento_km_l, v.es_principal, v.creado_en,
+         tc.nombre AS combustible,
+         vm.marca AS marca_oficial, vm.modelo AS modelo_oficial, vm.anio AS anio_oficial,
+         vm.rendimiento_oficial AS rendimiento_oficial
+       FROM vehiculos v
+       JOIN tipos_combustible tc ON tc.id = v.tipo_combustible_id
+       LEFT JOIN modelos_vehiculo vm ON vm.id = v.modelo_id
+       WHERE v.id = ? AND v.usuario_id = ?`,
+      [req.params.id, req.usuarioId]
+    )
+
+    if (!rows.length) {
+      return res.status(404).json({ error: 'Vehículo no encontrado' })
+    }
+
+    const vehiculo = rows[0]
+    res.json({
+      id               : vehiculo.id,
+      alias            : vehiculo.alias,
+      marca_manual     : vehiculo.marca_manual,
+      modelo_manual    : vehiculo.modelo_manual,
+      anio_manual      : vehiculo.anio_manual,
+      marca_oficial    : vehiculo.marca_oficial,
+      modelo_oficial   : vehiculo.modelo_oficial,
+      anio_oficial     : vehiculo.anio_oficial,
+      rendimiento_km_l : vehiculo.rendimiento_km_l,
+      rendimiento_oficial: vehiculo.rendimiento_oficial,
+      tipo_combustible : vehiculo.combustible,
+      es_principal     : Boolean(vehiculo.es_principal),
+      creado_en        : vehiculo.creado_en,
+      nombre_mostrado  : vehiculo.alias
+                         || ' - '
+                         || (vehiculo.marca_manual || vehiculo.marca_oficial || 'Marca')
+                         || ' '
+                         || (vehiculo.modelo_manual || vehiculo.modelo_oficial || 'Modelo')
+                         || ' '
+                         || (vehiculo.anio_manual || vehiculo.anio_oficial || ''),
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Error al obtener vehículo' })
+  }
+}
+
+const getModelosVehiculo = async (req, res) => {
+  try {
+    const { marca, modelo, anio } = req.query
+    let sql = 'SELECT id, marca, modelo, anio, rendimiento_oficial FROM modelos_vehiculo WHERE 1=1'
+    const params = []
+
+    if (marca) {
+      sql += ' AND marca LIKE ?'
+      params.push(`%${marca}%`)
+    }
+    if (modelo) {
+      sql += ' AND modelo LIKE ?'
+      params.push(`%${modelo}%`)
+    }
+    if (anio) {
+      sql += ' AND anio = ?'
+      params.push(anio)
+    }
+
+    sql += ' ORDER BY marca, modelo, anio'
+    const [rows] = await pool.query(sql, params)
+    res.json(rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Error al listar modelos de vehículo' })
+  }
+}
+
+const getModeloVehiculo = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, marca, modelo, anio, rendimiento_oficial FROM modelos_vehiculo WHERE id = ?',
+      [req.params.id]
+    )
+    if (!rows.length) {
+      return res.status(404).json({ error: 'Modelo de vehículo no encontrado' })
+    }
+    res.json(rows[0])
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Error al obtener modelo de vehículo' })
+  }
+}
+
+const crearModeloVehiculo = async (req, res) => {
+  const { marca, modelo, anio, rendimiento_oficial } = req.body
+
+  if (!marca || !modelo || !anio || !rendimiento_oficial) {
+    return res.status(400).json({ error: 'marca, modelo, anio y rendimiento_oficial son requeridos' })
+  }
+
+  try {
+    const [result] = await pool.query(
+      'INSERT INTO modelos_vehiculo (marca, modelo, anio, rendimiento_oficial) VALUES (?, ?, ?, ?)',
+      [marca, modelo, anio, rendimiento_oficial]
+    )
+    res.status(201).json({ mensaje: 'Modelo de vehículo agregado', id: result.insertId })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Error al crear modelo de vehículo' })
+  }
+}
+
+module.exports = { crearVehiculo, getVehiculos, getVehiculo, eliminarVehiculo, calcularCosto, getModelosVehiculo, getModeloVehiculo, crearModeloVehiculo }

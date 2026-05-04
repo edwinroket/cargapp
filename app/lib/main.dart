@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/auth_provider.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/mapa/mapa_screen.dart';
+import 'screens/alertas/alertas_screen.dart';
+import 'screens/reportes/reportes_screen.dart';
+import 'screens/perfil/perfil_screen.dart';
 
 void main() {
-  runApp(const CargApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AuthProvider()..verificarSesion(),
+      child: const CargApp(),
+    ),
+  );
 }
 
 class CargApp extends StatelessWidget {
@@ -18,8 +30,19 @@ class CargApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const MainScreen(),
+      home: const AuthGate(),
     );
+  }
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
+    if (auth.logueado) return const MainScreen();
+    return const LoginScreen();
   }
 }
 
@@ -34,10 +57,10 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const PlaceholderScreen(icon: Icons.map,        titulo: 'Mapa'),
-    const PlaceholderScreen(icon: Icons.notifications, titulo: 'Alertas'),
-    const PlaceholderScreen(icon: Icons.campaign,   titulo: 'Reportes'),
-    const PlaceholderScreen(icon: Icons.person,     titulo: 'Perfil'),
+    const MapaScreen(),
+    const AlertasScreen(),
+    const ReportesScreen(),
+    const PerfilScreen(),
   ];
 
   @override
@@ -69,41 +92,6 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person),
             label: 'Perfil',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class PlaceholderScreen extends StatelessWidget {
-  final IconData icon;
-  final String titulo;
-
-  const PlaceholderScreen({
-    super.key,
-    required this.icon,
-    required this.titulo,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 80, color: const Color(0xFF16a34a)),
-          const SizedBox(height: 16),
-          Text(
-            titulo,
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Próximamente',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.grey,
-            ),
           ),
         ],
       ),

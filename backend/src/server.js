@@ -6,7 +6,7 @@ const { syncEstaciones }   = require('./jobs/syncCNE')
 const { verificarAlertas } = require('./controllers/alertasController')
 const { syncDescuentos }   = require('./jobs/syncDescuentos')
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor CargApp corriendo en http://localhost:${PORT}`)
   syncEstaciones().then(() => verificarAlertas())
   syncDescuentos()

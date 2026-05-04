@@ -6,7 +6,11 @@ router.use(verificarToken)
 
 router.post('/',            controller.crearVehiculo)
 router.get('/',             controller.getVehiculos)
-router.delete('/:id',       controller.eliminarVehiculo)
 router.get('/costo',        controller.calcularCosto)
+router.get('/modelos',      controller.getModelosVehiculo)
+router.post('/modelos',     controller.crearModeloVehiculo)
+router.get('/modelos/:id',  controller.getModeloVehiculo)
+router.get('/:id',          controller.getVehiculo)
+router.delete('/:id',       controller.eliminarVehiculo)
 
 module.exports = router

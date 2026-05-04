@@ -28,6 +28,17 @@ class AuthService {
     return data;
   }
 
+  static Future<Map<String, dynamic>> actualizarPerfil(
+      String nombre, String telefono) async {
+    final data = await ApiService.put(
+      '${ApiConfig.usuarios}/perfil',
+      {'nombre_completo': nombre, 'telefono': telefono},
+    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('usuario', jsonEncode(data));
+    return data;
+  }
+
   static Future<Usuario?> getUsuarioGuardado() async {
     final prefs   = await SharedPreferences.getInstance();
     final usuarioStr = prefs.getString('usuario');

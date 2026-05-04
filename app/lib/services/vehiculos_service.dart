@@ -1,4 +1,5 @@
 import '../config/api.dart';
+import '../models/modelo_vehiculo.dart';
 import '../models/vehiculo.dart';
 import 'api_service.dart';
 
@@ -9,6 +10,7 @@ class VehiculosService {
   }
 
   static Future<void> crearVehiculo({
+    int? modeloId,
     required String marca,
     required String modelo,
     required int anio,
@@ -18,6 +20,7 @@ class VehiculosService {
     bool esPrincipal = false,
   }) async {
     await ApiService.post(ApiConfig.vehiculos, {
+      'modelo_id'          : modeloId,
       'marca_manual'       : marca,
       'modelo_manual'      : modelo,
       'anio_manual'        : anio,
@@ -26,6 +29,22 @@ class VehiculosService {
       'alias'              : alias,
       'es_principal'       : esPrincipal,
     });
+  }
+
+  static Future<List<ModeloVehiculo>> getModelos({
+    String? marca,
+    String? modelo,
+    int? anio,
+  }) async {
+    var query = ApiConfig.vehiculosModelos;
+    final params = <String>[];
+    if (marca != null && marca.isNotEmpty) params.add('marca=${Uri.encodeComponent(marca)}');
+    if (modelo != null && modelo.isNotEmpty) params.add('modelo=${Uri.encodeComponent(modelo)}');
+    if (anio != null) params.add('anio=$anio');
+    if (params.isNotEmpty) query += '?${params.join('&')}';
+
+    final data = await ApiService.get(query);
+    return (data as List).map((item) => ModeloVehiculo.fromJson(item)).toList();
   }
 
   static Future<Map<String, dynamic>> calcularCosto({

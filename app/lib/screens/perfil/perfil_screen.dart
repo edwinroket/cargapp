@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import 'vehiculos_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -232,24 +231,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       ),
                     ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const VehiculosScreen(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.directions_car),
-                label: const Text('Mis vehículos'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563eb),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
               ),
               const SizedBox(height: 16),

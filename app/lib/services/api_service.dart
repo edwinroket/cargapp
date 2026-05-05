@@ -70,11 +70,22 @@ class ApiService {
 
   // Manejar respuesta
   static dynamic _handleResponse(http.Response response) {
-    final body = jsonDecode(utf8.decode(response.bodyBytes));
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return body;
-    } else {
-      throw Exception(body['error'] ?? 'Error desconocido');
+    try {
+      final body = jsonDecode(utf8.decode(response.bodyBytes));
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return body;
+      } else {
+        throw Exception(body['error'] ?? 'Error desconocido');
+      }
+    } catch (e) {
+      // Si no es JSON válido, probablemente es un error del servidor
+      if (response.statusCode >= 500) {
+        throw Exception('Error del servidor (${response.statusCode})');
+      } else if (response.statusCode >= 400) {
+        throw Exception('Error en la solicitud (${response.statusCode})');
+      } else {
+        throw Exception('Error al procesar la respuesta: $e');
+      }
     }
   }
 }

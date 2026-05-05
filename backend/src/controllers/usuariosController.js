@@ -108,8 +108,16 @@ const login = async (req, res) => {
 const getPerfil = async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT id, email, nombre_completo, telefono, puntos_reputacion, es_premium, creado_en
-       FROM usuarios WHERE id = ?`, [req.usuarioId]
+      `SELECT 
+        u.id, u.email, u.nombre_completo, u.telefono, u.puntos_reputacion, u.es_premium, u.creado_en,
+        u.ciudad_id,
+        c.nombre AS ciudad,
+        r.id AS region_id,
+        r.nombre AS region
+       FROM usuarios u
+       LEFT JOIN ciudades c ON c.id = u.ciudad_id
+       LEFT JOIN regiones r ON r.id = c.region_id
+       WHERE u.id = ?`, [req.usuarioId]
     )
     if (!rows.length) return res.status(404).json({ error: 'Usuario no encontrado' })
     res.json(rows[0])
@@ -119,9 +127,9 @@ const getPerfil = async (req, res) => {
 }
 
 const actualizarPerfil = async (req, res) => {
-  const { nombre_completo, telefono } = req.body
+  const { nombre_completo, telefono, ciudad_id } = req.body
 
-  if (nombre_completo == null && telefono == null) {
+  if (nombre_completo == null && telefono == null && ciudad_id == null) {
     return res.status(400).json({ error: 'No hay datos para actualizar' })
   }
 
@@ -138,13 +146,27 @@ const actualizarPerfil = async (req, res) => {
     params.push(telefono || null)
   }
 
+  if (ciudad_id !== null) {
+    updates.push('ciudad_id = ?')
+    params.push(ciudad_id || null)
+  }
+
   params.push(req.usuarioId)
 
   try {
     await pool.query(`UPDATE usuarios SET ${updates.join(', ')} WHERE id = ?`, params)
 
     const [rows] = await pool.query(
-      `SELECT id, email, nombre_completo, telefono, puntos_reputacion, es_premium FROM usuarios WHERE id = ?`,
+      `SELECT 
+        u.id, u.email, u.nombre_completo, u.telefono, u.puntos_reputacion, u.es_premium,
+        u.ciudad_id,
+        c.nombre AS ciudad,
+        r.id AS region_id,
+        r.nombre AS region
+       FROM usuarios u
+       LEFT JOIN ciudades c ON c.id = u.ciudad_id
+       LEFT JOIN regiones r ON r.id = c.region_id
+       WHERE u.id = ?`,
       [req.usuarioId]
     )
 
@@ -155,4 +177,37 @@ const actualizarPerfil = async (req, res) => {
   }
 }
 
-module.exports = { registro, login, getPerfil, actualizarPerfil }
+// Obtener todas las regiones
+const getRegiones = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, nombre, codigo FROM regiones ORDER BY nombre'
+    )
+    res.json(rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Error al obtener regiones' })
+  }
+}
+
+// Obtener ciudades por región
+const getCiudadesPorRegion = async (req, res) => {
+  const { regionId } = req.params
+  
+  if (!regionId) {
+    return res.status(400).json({ error: 'regionId es requerido' })
+  }
+
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, nombre FROM ciudades WHERE region_id = ? ORDER BY nombre',
+      [regionId]
+    )
+    res.json(rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Error al obtener ciudades' })
+  }
+}
+
+module.exports = { registro, login, getPerfil, actualizarPerfil, getRegiones, getCiudadesPorRegion }

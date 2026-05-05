@@ -5,6 +5,9 @@ const cron = require('node-cron')
 const { syncEstaciones }   = require('./jobs/syncCNE')
 const { verificarAlertas } = require('./controllers/alertasController')
 const { syncDescuentos }   = require('./jobs/syncDescuentos')
+const descuentosRoutes = require('./routes/descuentos');
+
+app.use('/api/descuentos', descuentosRoutes);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor CargApp corriendo en http://localhost:${PORT}`)

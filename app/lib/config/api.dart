@@ -6,5 +6,6 @@ class ApiConfig {
   static const String alertas           = '$baseUrl/alertas';
   static const String reportes          = '$baseUrl/reportes';
   static const String vehiculos         = '$baseUrl/vehiculos';
+  static const String descuentos        = '$baseUrl/descuentos';
   static const String vehiculosModelos  = '$vehiculos/modelos';
 }

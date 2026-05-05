@@ -137,6 +137,41 @@ class _EstacionDetalleScreenState extends State<EstacionDetalleScreen> {
                     child: Divider(),
                   ),
 
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Divider(),
+                  ),
+
+                  // SECCIÓN DE DESCUENTOS
+                  const Text('Beneficios y Convenios', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const SizedBox(height: 10),
+                  
+                  // Tarjeta de Descuento
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFf0fdf4), // Un verde muy claro
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFF16a34a).withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.stars, color: Colors.orange, size: 30),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text('Descuento Municipal', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                              Text('-\$15 por litro con tarjeta de vecino.', style: TextStyle(color: Colors.black54, fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                   // Listado de precios estilo "Bencina en Línea"
                   const Text('Precios por litro', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 15),

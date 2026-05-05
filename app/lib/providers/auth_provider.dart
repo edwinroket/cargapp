@@ -56,13 +56,13 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> actualizarPerfil(String nombre, String telefono) async {
+  Future<bool> actualizarPerfil(String nombre, String telefono, {int? ciudadId}) async {
     _cargando = true;
     _error    = null;
     notifyListeners();
 
     try {
-      final data = await AuthService.actualizarPerfil(nombre, telefono);
+      final data = await AuthService.actualizarPerfil(nombre, telefono, ciudadId: ciudadId);
       _usuario   = Usuario.fromJson(data);
       _cargando  = false;
       notifyListeners();

@@ -29,10 +29,15 @@ class AuthService {
   }
 
   static Future<Map<String, dynamic>> actualizarPerfil(
-      String nombre, String telefono) async {
+      String nombre, String telefono, {int? ciudadId}) async {
+    final body = {
+      'nombre_completo': nombre,
+      'telefono': telefono,
+      if (ciudadId != null) 'ciudad_id': ciudadId,
+    };
     final data = await ApiService.put(
       '${ApiConfig.usuarios}/perfil',
-      {'nombre_completo': nombre, 'telefono': telefono},
+      body,
     );
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('usuario', jsonEncode(data));
@@ -48,5 +53,15 @@ class AuthService {
 
   static Future<void> logout() async {
     await ApiService.clearToken();
+  }
+
+  static Future<List<Map<String, dynamic>>> getRegiones() async {
+    final data = await ApiService.get('${ApiConfig.usuarios}/regiones');
+    return List<Map<String, dynamic>>.from(data);
+  }
+
+  static Future<List<Map<String, dynamic>>> getCiudadesPorRegion(int regionId) async {
+    final data = await ApiService.get('${ApiConfig.usuarios}/regiones/$regionId/ciudades');
+    return List<Map<String, dynamic>>.from(data);
   }
 } 

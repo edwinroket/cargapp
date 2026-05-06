@@ -60,10 +60,10 @@ class _MapaScreenState extends State<MapaScreen> {
               double.parse(e['latitud'].toString()), 
               double.parse(e['longitud'].toString())
             ),
-            // Volvemos al pin estándar de Google Maps
             icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
             infoWindow: InfoWindow(
-              title: e['nombre'].toString().trim(),
+              // CAMBIO AQUÍ: Usamos 'marca' en lugar de 'nombre'
+              title: e['marca'].toString().toUpperCase().trim(), 
               snippet: 'Toca para ver precios',
               onTap: () {
                 Navigator.push(

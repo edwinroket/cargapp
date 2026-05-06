@@ -4,6 +4,7 @@ import 'providers/auth_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/mapa/mapa_screen.dart';
 import 'screens/alertas/alertas_screen.dart';
+import 'screens/descuentos/descuentos_screen.dart';
 import 'screens/reportes/reportes_screen.dart';
 import 'screens/perfil/perfil_screen.dart';
 
@@ -59,6 +60,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     const MapaScreen(),
     const AlertasScreen(),
+    const DescuentosScreen(),
     const ReportesScreen(),
     const PerfilScreen(),
   ];
@@ -82,6 +84,11 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.notifications_outlined),
             selectedIcon: Icon(Icons.notifications),
             label: 'Alertas',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.local_offer_outlined),
+            selectedIcon: Icon(Icons.local_offer),
+            label: 'Descuentos',
           ),
           NavigationDestination(
             icon: Icon(Icons.campaign_outlined),

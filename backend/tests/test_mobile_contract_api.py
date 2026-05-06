@@ -21,8 +21,22 @@ def test_estacion_detalle_contract(client):
     assert response.status_code == 200
     data = response.json()
     assert data["estacion"]["id"] == 1
+    assert "tiene_cajero" in data["estacion"]
     assert len(data["precios_actuales"]) >= 1
+    assert "precio_anterior" in data["precios_actuales"][0]
     assert len(data["historial"]) >= 1
+    assert "fecha_registro" in data["historial"][0]
+
+
+def test_descuentos_contract(client):
+    """Discount endpoint returns rows used by the discounts screen."""
+    response = client.get("/descuentos")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert data[0]["convenio"]
+    assert data[0]["descuento_num"] > 0
 
 
 def test_perfil_contract(client, auth_token):

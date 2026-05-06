@@ -6,6 +6,7 @@ from app.config import settings
 from app.health import router as health_router
 from app.api.alertas import create_alertas_router
 from app.api.auth import create_auth_router
+from app.api.descuentos import create_descuentos_router
 from app.api.estaciones import create_estaciones_router
 from app.api.reportes import create_reportes_router
 from app.api.usuario import create_usuario_router
@@ -46,6 +47,7 @@ def create_app() -> FastAPI:
     app.include_router(create_auth_router(usuario_store))
     app.include_router(create_usuario_router(usuario_store))
     app.include_router(create_estaciones_router())
+    app.include_router(create_descuentos_router())
     app.include_router(create_vehiculos_router())
     app.include_router(create_alertas_router())
     app.include_router(create_reportes_router())

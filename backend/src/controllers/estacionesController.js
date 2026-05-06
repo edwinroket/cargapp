@@ -13,6 +13,7 @@ const getCercanas = async (req, res) => {
         e.id, e.nombre, e.marca, e.direccion, e.comuna, e.region,
         e.latitud, e.longitud, e.horario, e.metodos_pago,
         e.tiene_bano, e.tiene_tienda, e.tiene_lubricentro,
+        e.tiene_cajero, e.tiene_aire, e.tiene_lavado,
         ROUND(
           6371 * ACOS(
             COS(RADIANS(?)) * COS(RADIANS(e.latitud)) *
@@ -27,7 +28,6 @@ const getCercanas = async (req, res) => {
       LIMIT 30
     `, [lat, lng, lat, radio])
 
-    // Para cada estación buscar sus últimos precios
     const estaciones = await Promise.all(rows.map(async (e) => {
       const [precios] = await pool.query(`
         SELECT 
@@ -48,7 +48,6 @@ const getCercanas = async (req, res) => {
       return { ...e, combustibles: precios }
     }))
 
-    // Filtrar por combustible si se especificó
     const resultado = combustible
       ? estaciones.filter(e => e.combustibles.some(c => c.combustible.includes(combustible)))
       : estaciones
@@ -90,17 +89,19 @@ const getDetalle = async (req, res) => {
       ORDER BY tc.categoria, tc.nombre
     `, [id, id])
 
-    // Historial de precios para gráfico (últimos 90 días)
+    // Historial de cambios REALES (Para la lista del detalle)
+    // Filtramos para obtener los últimos 15 cambios de precio
     const [historial] = await pool.query(`
       SELECT 
         tc.nombre AS combustible,
         hp.precio,
-        DATE(hp.fecha_registro) AS fecha
+        hp.fecha_registro,
+        hp.fuente
       FROM historial_precios hp
       JOIN tipos_combustible tc ON tc.id = hp.tipo_combustible_id
       WHERE hp.estacion_id = ?
-        AND hp.fecha_registro >= DATE_SUB(NOW(), INTERVAL 90 DAY)
-      ORDER BY hp.fecha_registro ASC
+      ORDER BY hp.fecha_registro DESC
+      LIMIT 15
     `, [id])
 
     res.json({

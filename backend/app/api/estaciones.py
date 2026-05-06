@@ -27,24 +27,28 @@ STATIONS = [
         "tiene_bano": 1,
         "tiene_tienda": 1,
         "tiene_lubricentro": 0,
+        "tiene_cajero": 1,
         "activa": 1,
         "combustibles": [
             {
                 "combustible": "Gasolina 93",
                 "categoria": "gasolina",
                 "precio": 1268,
+                "precio_anterior": 1275,
                 "fecha_registro": "2026-05-06T09:00:00",
             },
             {
                 "combustible": "Gasolina 95",
                 "categoria": "gasolina",
                 "precio": 1312,
+                "precio_anterior": 1308,
                 "fecha_registro": "2026-05-06T09:00:00",
             },
             {
                 "combustible": "Gasolina 97",
                 "categoria": "gasolina",
                 "precio": 1369,
+                "precio_anterior": 1369,
                 "fecha_registro": "2026-05-06T09:00:00",
             },
         ],
@@ -63,24 +67,28 @@ STATIONS = [
         "tiene_bano": 1,
         "tiene_tienda": 1,
         "tiene_lubricentro": 1,
+        "tiene_cajero": 1,
         "activa": 1,
         "combustibles": [
             {
                 "combustible": "Gasolina 93",
                 "categoria": "gasolina",
                 "precio": 1259,
+                "precio_anterior": 1261,
                 "fecha_registro": "2026-05-06T09:00:00",
             },
             {
                 "combustible": "Gasolina 95",
                 "categoria": "gasolina",
                 "precio": 1305,
+                "precio_anterior": 1305,
                 "fecha_registro": "2026-05-06T09:00:00",
             },
             {
                 "combustible": "Diesel",
                 "categoria": "diesel",
                 "precio": 1024,
+                "precio_anterior": 1030,
                 "fecha_registro": "2026-05-06T09:00:00",
             },
         ],
@@ -99,24 +107,28 @@ STATIONS = [
         "tiene_bano": 1,
         "tiene_tienda": 0,
         "tiene_lubricentro": 0,
+        "tiene_cajero": 0,
         "activa": 1,
         "combustibles": [
             {
                 "combustible": "Gasolina 93",
                 "categoria": "gasolina",
                 "precio": 1247,
+                "precio_anterior": 1255,
                 "fecha_registro": "2026-05-06T09:00:00",
             },
             {
                 "combustible": "Gasolina 97",
                 "categoria": "gasolina",
                 "precio": 1358,
+                "precio_anterior": 1350,
                 "fecha_registro": "2026-05-06T09:00:00",
             },
             {
                 "combustible": "Diesel",
                 "categoria": "diesel",
                 "precio": 1018,
+                "precio_anterior": 1018,
                 "fecha_registro": "2026-05-06T09:00:00",
             },
         ],
@@ -190,6 +202,8 @@ def create_estaciones_router() -> APIRouter:
                     "combustible": price["combustible"],
                     "precio": price["precio"],
                     "fecha": "2026-05-06",
+                    "fecha_registro": price["fecha_registro"],
+                    "fuente": "cne",
                 }
             )
 

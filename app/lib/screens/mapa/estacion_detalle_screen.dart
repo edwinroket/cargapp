@@ -136,7 +136,7 @@ class _EstacionDetalleScreenState extends State<EstacionDetalleScreen> {
                     padding: EdgeInsets.symmetric(vertical: 20),
                     child: Divider(),
                   ),
-
+                  /*
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 10),
                     child: Divider(),
@@ -170,7 +170,7 @@ class _EstacionDetalleScreenState extends State<EstacionDetalleScreen> {
                         ),
                       ],
                     ),
-                  ),
+                  ),*/
 
                   // Listado de precios estilo "Bencina en Línea"
                   const Text('Precios por litro', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),

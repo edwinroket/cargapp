@@ -49,6 +49,7 @@ const getDescuentos = async (req, res) => {
     console.error('Error get descuentos:', err.message)
     res.status(500).json({ error: 'Error al obtener descuentos' })
   }
+  
 }
 
 module.exports = { getDescuentos }

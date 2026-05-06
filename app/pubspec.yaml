@@ -12,9 +12,12 @@ dependencies:
   
   # HTTP
   http: ^1.2.0
+  dio: ^5.7.0
   
   # Estado global
   provider: ^6.1.2
+  flutter_riverpod: ^2.5.1
+  dartz: ^0.10.1
   
   # Almacenamiento local (guardar token)
   shared_preferences: ^2.2.3

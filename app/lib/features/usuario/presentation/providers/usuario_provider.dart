@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/datasources/usuario_mock_datasource.dart';
-import '../../data/datasources/usuario_remote_datasource_impl.dart';
 import '../../data/repositories/usuario_repository_impl.dart';
 import '../../domain/entities/usuario.dart';
 import '../../domain/repositories/usuario_repository.dart';

@@ -1,9 +1,6 @@
-import 'package:dartz/dartz.dart';
-
 import '../../domain/entities/usuario.dart';
 import '../../domain/repositories/usuario_repository.dart';
 import '../datasources/usuario_remote_datasource.dart';
-import '../models/usuario_model.dart';
 
 /// Concrete implementation of UsuarioRepository
 class UsuarioRepositoryImpl implements UsuarioRepository {

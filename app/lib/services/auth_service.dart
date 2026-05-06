@@ -7,25 +7,34 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthService {
   static Future<Map<String, dynamic>> login(String email, String password) async {
     final data = await ApiService.post(
-      '${ApiConfig.usuarios}/login',
-      {'email': email, 'contrasena': password},
+      '${ApiConfig.auth}/login',
+      {'email': email, 'password': password},
     );
-    await ApiService.saveToken(data['token']);
+    final token = data['access_token'] ?? data['token'];
+    final usuario = data['user'] ?? data['usuario'];
+    await ApiService.saveToken(token);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('usuario', jsonEncode(data['usuario']));
-    return data;
+    await prefs.setString('usuario', jsonEncode(usuario));
+    return {'token': token, 'usuario': usuario};
   }
 
   static Future<Map<String, dynamic>> registro(
       String email, String password, String nombre) async {
     final data = await ApiService.post(
-      '${ApiConfig.usuarios}/registro',
-      {'email': email, 'contrasena': password, 'nombre_completo': nombre},
+      '${ApiConfig.auth}/register',
+      {
+        'email': email,
+        'password': password,
+        'role': 'usuario',
+        'nombre_completo': nombre,
+      },
     );
-    await ApiService.saveToken(data['token']);
+    final token = data['access_token'] ?? data['token'];
+    final usuario = data['user'] ?? data['usuario'];
+    await ApiService.saveToken(token);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('usuario', jsonEncode(data['usuario']));
-    return data;
+    await prefs.setString('usuario', jsonEncode(usuario));
+    return {'token': token, 'usuario': usuario};
   }
 
   static Future<Map<String, dynamic>> actualizarPerfil(

@@ -1,4 +1,4 @@
-import '../../../domain/entities/usuario.dart';
+import '../../domain/entities/usuario.dart';
 
 /// Usuario data model (JSON serialization)
 class UsuarioModel {

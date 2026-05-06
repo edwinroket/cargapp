@@ -25,16 +25,22 @@ class Usuario {
 
   factory Usuario.fromJson(Map<String, dynamic> json) {
     return Usuario(
-      id        : json['id'],
+      id        : _parseInt(json['id']),
       email     : json['email']      ?? '',
       nombre    : json['nombre']     ?? json['nombre_completo'],
-      telefono  : json['telefono'] ?? json['telefono'] ?? null,
-      esPremium : json['premium'] == 1 || json['es_premium'] == 1,
+      telefono  : json['telefono'],
+      esPremium : json['premium'] == 1 || json['premium'] == true ||
+          json['es_premium'] == 1 || json['es_premium'] == true,
       reputacion: json['reputacion'] ?? json['puntos_reputacion'] ?? 0,
       ciudadId  : json['ciudad_id'],
       ciudad    : json['ciudad'],
       regionId  : json['region_id'],
       region    : json['region'],
     );
+  }
+
+  static int _parseInt(dynamic value) {
+    if (value is int) return value;
+    return int.tryParse(value?.toString() ?? '') ?? 0;
   }
 }

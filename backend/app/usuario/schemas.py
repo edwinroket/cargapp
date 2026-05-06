@@ -15,6 +15,9 @@ class UserCreate(UserBase):
     """Schema for creating a user."""
 
     password: str
+    nombre_completo: Optional[str] = None
+    telefono: Optional[str] = None
+    ciudad_id: Optional[int] = None
 
 
 class UserLogin(BaseModel):
@@ -29,6 +32,14 @@ class User(UserBase):
 
     id: str
     status: str
+    nombre_completo: Optional[str] = None
+    telefono: Optional[str] = None
+    puntos_reputacion: int = 0
+    es_premium: bool = False
+    ciudad_id: Optional[int] = None
+    ciudad: Optional[str] = None
+    region_id: Optional[int] = None
+    region: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -40,6 +51,9 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     role: Optional[str] = None
     status: Optional[str] = None
+    nombre_completo: Optional[str] = None
+    telefono: Optional[str] = None
+    ciudad_id: Optional[int] = None
 
 
 class AuthResponse(BaseModel):

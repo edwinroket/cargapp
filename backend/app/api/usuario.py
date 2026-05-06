@@ -14,6 +14,42 @@ def create_usuario_router(usuario_store: UsuarioMockStore) -> APIRouter:
         tags=["usuarios"],
     )
 
+    @router.get("/perfil", response_model=User)
+    async def get_perfil(payload: dict = Depends(get_current_user_token)):
+        """Get the authenticated user's profile."""
+        user = await usuario_store.get_usuario(payload["user_id"])
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
+        return user
+
+    @router.put("/perfil", response_model=User)
+    async def update_perfil(
+        updates: UserUpdate,
+        payload: dict = Depends(get_current_user_token),
+    ):
+        """Update the authenticated user's profile."""
+        updates_dict = updates.dict(exclude_unset=True)
+        user = await usuario_store.update_usuario(payload["user_id"], updates_dict)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
+        return user
+
+    @router.get("/regiones")
+    async def list_regiones():
+        """List Chilean regions available for the profile form."""
+        return usuario_store.regiones
+
+    @router.get("/regiones/{region_id}/ciudades")
+    async def list_ciudades(region_id: int):
+        """List cities for a region."""
+        return usuario_store.ciudades.get(region_id, [])
+
     @router.post("/", response_model=User)
     async def create_usuario(
         usuario: UserCreate,

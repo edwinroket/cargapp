@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config/api.dart';
 
 class ApiService {
   // Obtener token guardado
@@ -75,7 +74,7 @@ class ApiService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return body;
       } else {
-        throw Exception(body['error'] ?? 'Error desconocido');
+        throw Exception(body['detail'] ?? body['error'] ?? 'Error desconocido');
       }
     } catch (e) {
       // Si no es JSON válido, probablemente es un error del servidor

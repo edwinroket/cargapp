@@ -2,6 +2,7 @@
 import os
 from typing import Literal
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -22,6 +23,16 @@ class Settings(BaseSettings):
 
     # CORS
     CORS_ORIGINS: list[str] = ["*"]
+
+    @field_validator("DEBUG", mode="before")
+    @classmethod
+    def parse_debug(cls, value):
+        """Accept bool-like deployment labels from legacy .env files."""
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str) and value.lower() in {"release", "prod", "production"}:
+            return False
+        return value
 
     class Config:
         env_file = ".env"

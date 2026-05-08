@@ -1,12 +1,18 @@
-const router     = require('express').Router()
-const controller = require('../controllers/reportesController')
-const { verificarToken } = require('../middleware/auth')
+const express = require('express');
+const router = express.Router();
+const controller = require('../controllers/reportesController');
+const { verificarToken } = require('../middleware/auth');
 
-// Ver reportes de una estación — público
-router.get('/estacion/:estacion_id', controller.getReportesEstacion)
+// 1. Ver reportes cercanos (Radio GPS) - Es un GET
+router.get('/cercanos', controller.getReportesCercanos);
 
-// Crear y votar — requiere login
-router.post('/',            verificarToken, controller.crearReporte)
-router.post('/:id/votar',   verificarToken, controller.votarReporte)
+// 2. Ver reportes de una estaci�n espec�fica
+router.get('/estacion/:estacion_id', controller.getReportesEstacion);
 
-module.exports = router
+// 3. Crear reporte - Requiere Login
+router.post('/', verificarToken, controller.crearReporte);
+
+// 4. Votar reporte - Requiere Login
+router.post('/:id/votar', verificarToken, controller.votarReporte);
+
+module.exports = router;

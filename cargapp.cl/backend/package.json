@@ -1,25 +1,27 @@
 {
-  "name": "cargapp",
+  "name": "cargapp-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Backend para CargApp - Gestión de combustible y alertas",
+  "main": "src/server.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "dependencies": {
-    "expo": "~50.0.0",
-    "@react-navigation/native": "6.1.9",
-    "@react-navigation/bottom-tabs": "6.5.11",
-    "@react-navigation/stack": "6.3.20",
-    "react-native-screens": "3.29.0",
-    "react-native-safe-area-context": "4.9.0",
-    "react-native": "0.73.6",
-    "react": "18.2.0",
     "axios": "^1.6.0",
-    "@react-native-async-storage/async-storage": "1.21.0"
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.9.7",
+    "node-cron": "^3.0.3"
+
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "nodemon": "^3.1.0"
   }
 }

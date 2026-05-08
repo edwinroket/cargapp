@@ -3,18 +3,25 @@ const express = require('express')
 const cors    = require('cors')
 const app     = express()
 
-require('./models/db')
+// 1. Importar las rutas una sola vez
+const usuariosRoutes = require('./routes/usuarios')
+const estacionesRoutes = require('./routes/estaciones')
+const alertasRoutes = require('./routes/alertas')
+const reportesRoutes = require('./routes/reportes')
+const vehiculosRoutes = require('./routes/vehiculos')
+const descuentosRoutes = require('./routes/descuentos')
 
+// 2. Middlewares
 app.use(cors())
 app.use(express.json())
 
-//rutas
-app.use('/api/usuarios', require('./routes/usuarios'))
-app.use('/api/estaciones', require('./routes/estaciones'))
-app.use('/api/alertas', require('./routes/alertas'))
-app.use('/api/reportes', require('./routes/reportes'))
-app.use('/api/vehiculos', require('./routes/vehiculos'))
-app.use('/api/descuentos', require('./routes/descuentos'))
+// 3. Registrar las rutas
+app.use('/api/usuarios', usuariosRoutes)
+app.use('/api/estaciones', estacionesRoutes)
+app.use('/api/alertas', alertasRoutes)
+app.use('/api/reportes', reportesRoutes)
+app.use('/api/vehiculos', vehiculosRoutes)
+app.use('/api/descuentos', descuentosRoutes)
 
 app.get('/', (req, res) => {
   res.json({ mensaje: 'CargApp API funcionando', version: '1.0' })

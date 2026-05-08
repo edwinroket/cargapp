@@ -1,11 +1,15 @@
-const router     = require('express').Router()
-const controller = require('../controllers/alertasController')
-const { verificarToken } = require('../middleware/auth')
+const express = require('express');
+const router = express.Router();
+const alertasController = require('../controllers/alertasController');
+const { verificarToken } = require('../middleware/auth'); // Cambiamos esto
 
-router.use(verificarToken)
+// Listar alertas - Ahora usamos verificarToken directamente
+router.get('/', verificarToken, alertasController.getAlertas);
 
-router.post('/',        controller.crearAlerta)
-router.get('/',         controller.getAlertas)
-router.delete('/:id',   controller.desactivarAlerta)
+// Crear alerta
+router.post('/', verificarToken, alertasController.crearAlerta);
 
-module.exports = router
+// Toggle (Switch)
+router.put('/:id', verificarToken, alertasController.toggleAlerta);
+
+module.exports = router;

@@ -4,6 +4,7 @@ class ModeloVehiculo {
   final String modelo;
   final int anio;
   final double rendimientoOficial;
+  final String? combustibleLabel;
 
   ModeloVehiculo({
     required this.id,
@@ -11,6 +12,7 @@ class ModeloVehiculo {
     required this.modelo,
     required this.anio,
     required this.rendimientoOficial,
+    this.combustibleLabel,
   });
 
   String get nombre => '$marca $modelo $anio';
@@ -20,8 +22,9 @@ class ModeloVehiculo {
       id: json['id'],
       marca: json['marca'] ?? '',
       modelo: json['modelo'] ?? '',
-      anio: json['anio'],
-      rendimientoOficial: double.tryParse(json['rendimiento_oficial'].toString()) ?? 0,
+      anio: json['anio'] ?? 0,
+      rendimientoOficial: double.tryParse(json['rendimiento_mixto']?.toString() ?? '0') ?? 0,
+      combustibleLabel: json['combustible_label'],
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
+import 'vehiculos_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -76,7 +77,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        builder: (context) { // Usamos el context del builder
+        builder: (context) {
           return StatefulBuilder(
             builder: (context, setModalState) {
               if (_regiones.isEmpty && !_cargandoRegiones && _errorRegiones == null) {
@@ -113,12 +114,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
                         ),
                         const SizedBox(height: 16),
                         
-                        // Dropdown de Región con solución al Overflow
                         if (_cargandoRegiones)
                           const Center(child: CircularProgressIndicator())
                         else
                           DropdownButtonFormField<int>(
-                            isExpanded: true, // SOLUCIÓN AL OVERFLOW: Evita que el texto se salga
+                            isExpanded: true,
                             value: _regionSeleccionada,
                             decoration: const InputDecoration(labelText: 'Región', border: OutlineInputBorder()),
                             items: _regiones.map((region) {
@@ -143,7 +143,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                           _cargandoCiudades 
                             ? const Center(child: CircularProgressIndicator())
                             : DropdownButtonFormField<int>(
-                                isExpanded: true, // SOLUCIÓN AL OVERFLOW
+                                isExpanded: true,
                                 value: _ciudadSeleccionada,
                                 decoration: const InputDecoration(labelText: 'Ciudad', border: OutlineInputBorder()),
                                 items: _ciudades.map((ciudad) {
@@ -159,21 +159,14 @@ class _PerfilScreenState extends State<PerfilScreen> {
                         ElevatedButton(
                           onPressed: () async {
                             if (!_formKey.currentState!.validate()) return;
-                            
-                            // 1. Guardamos una referencia al ScaffoldMessenger ANTES del pop
                             final messenger = ScaffoldMessenger.of(this.context);
-                            
-                            // 2. Cerramos el modal
                             Navigator.pop(context);
-                            
-                            // 3. Ejecutamos la actualización
                             final ok = await auth.actualizarPerfil(
                               _nombreCtrl.text.trim(),
                               _telefonoCtrl.text.trim(),
                               ciudadId: _ciudadSeleccionada,
                             );
 
-                            // 4. Usamos la referencia guardada para mostrar el mensaje
                             if (!ok) {
                               messenger.showSnackBar(
                                 SnackBar(
@@ -225,6 +218,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     }
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF3F4F6), // Color de fondo suave
       appBar: AppBar(
         title: const Text('Mi perfil'),
         backgroundColor: const Color(0xFF16a34a),
@@ -235,13 +229,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView( // CORRECCIÓN: Permite scroll para evitar Overflow
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 24),
+                const SizedBox(height: 10),
                 Center(
                   child: CircleAvatar(
                     radius: 46,
@@ -256,33 +250,59 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 ),
                 const SizedBox(height: 20),
                 Text(usuario.nombre ?? 'Usuario', textAlign: TextAlign.center, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
                 Text(usuario.email, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, color: Colors.grey)),
-                const SizedBox(height: 8),
-                Text(usuario.telefono ?? 'Sin teléfono registrado', textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, color: Colors.grey)),
-                const SizedBox(height: 8),
-                Text(
-                  usuario.ciudad != null ? '${usuario.ciudad}, ${usuario.region ?? ""}' : 'Sin ciudad registrada',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16, color: Colors.grey),
-                ),
                 const SizedBox(height: 24),
+                
+                // --- SECCIÓN: MI GESTIÓN (NUEVO BOTÓN AL GARAGE) ---
+                const Padding(
+                  padding: EdgeInsets.only(left: 4, bottom: 8),
+                  child: Text("Mi Gestión", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
+                ),
                 Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.directions_car_filled_rounded, color: Color(0xFF16a34a)),
+                        title: const Text("Mi Garage", style: TextStyle(fontWeight: FontWeight.w600)),
+                        subtitle: const Text("Gestiona tus vehículos y calculadora"),
+                        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => VehiculosScreen()),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+                
+                // --- SECCIÓN: MEMBRESÍA Y ESTADÍSTICAS ---
+                const Padding(
+                  padding: EdgeInsets.only(left: 4, bottom: 8),
+                  child: Text("Cuenta", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
+                ),
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        _buildInfoRow(Icons.star, 'Reputación', usuario.reputacion.toString()),
-                        const SizedBox(height: 16),
+                        _buildInfoRow(Icons.star_rounded, 'Reputación', usuario.reputacion.toString()),
+                        const Divider(height: 24),
                         Row(
                           children: [
-                            const Icon(Icons.workspace_premium, color: Color(0xFF16a34a)),
+                            const Icon(Icons.workspace_premium_rounded, color: Color(0xFF16a34a)),
                             const SizedBox(width: 12),
-                            const Text('Premium', style: TextStyle(fontWeight: FontWeight.bold)),
+                            const Text('Plan Premium', style: TextStyle(fontWeight: FontWeight.bold)),
                             const Spacer(),
                             Chip(
-                              label: Text(usuario.esPremium ? 'Activo' : 'Básico', style: const TextStyle(color: Colors.white)),
+                              label: Text(usuario.esPremium ? 'Activo' : 'Básico', style: const TextStyle(color: Colors.white, fontSize: 12)),
                               backgroundColor: usuario.esPremium ? const Color(0xFF16a34a) : Colors.grey,
                             ),
                           ],
@@ -291,15 +311,21 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                
+                const SizedBox(height: 32),
+                
+                // --- BOTÓN CERRAR SESIÓN ---
                 ElevatedButton.icon(
                   onPressed: auth.logout,
-                  icon: const Icon(Icons.logout),
+                  icon: const Icon(Icons.logout_rounded),
                   label: const Text('Cerrar sesión'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFdc2626),
-                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                    elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
               ],
@@ -315,9 +341,9 @@ class _PerfilScreenState extends State<PerfilScreen> {
       children: [
         Icon(icon, color: const Color(0xFF16a34a)),
         const SizedBox(width: 12),
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
         const Spacer(),
-        Text(value),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
       ],
     );
   }

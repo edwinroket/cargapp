@@ -39,7 +39,7 @@ const syncEstaciones = async () => {
         }
 
         const totalCNE = estaciones.length;
-        console.log(` [CNE] Procesando ${totalCNE} estaciones detectadas...`);
+        console.log(` [CNE] Procesando ${totalCNE} estaciones...`);
 
         let insertadas = 0, actualizadas = 0, preciosCont = 0, procesadas = 0;
 
@@ -48,13 +48,10 @@ const syncEstaciones = async () => {
             const cne_id = String(e.codigo || e.id || '');
             if (!cne_id) continue;
 
-            const [existe] = await pool.query(
-                'SELECT id FROM estaciones WHERE cne_id = ?', [cne_id]
-            );
+            const [existe] = await pool.query('SELECT id FROM estaciones WHERE cne_id = ?', [cne_id]);
 
             let estacionId;
             const marcaNombre = e.distribuidor?.nombre || e.distribuidor?.marca || 'S/M';
-            
             const servicios = e.servicios || {};
             const datos = [
                 e.razon_social || e.nombre_fantasia || 'Estación sin nombre',
@@ -77,11 +74,9 @@ const syncEstaciones = async () => {
             if (existe.length > 0) {
                 await pool.query(`
                     UPDATE estaciones SET
-                        nombre = ?, marca = ?, direccion = ?,
-                        latitud = ?, longitud = ?, region = ?,
-                        comuna = ?, horario = ?, 
-                        tiene_bano = ?, tiene_tienda = ?, tiene_lubricentro = ?,
-                        tiene_cajero = ?, tiene_aire = ?, tiene_lavado = ?,
+                        nombre = ?, marca = ?, direccion = ?, latitud = ?, longitud = ?, 
+                        region = ?, comuna = ?, horario = ?, tiene_bano = ?, tiene_tienda = ?, 
+                        tiene_lubricentro = ?, tiene_cajero = ?, tiene_aire = ?, tiene_lavado = ?,
                         ultima_sync_cne = NOW()
                     WHERE cne_id = ?
                 `, datos);
@@ -89,10 +84,7 @@ const syncEstaciones = async () => {
                 actualizadas++;
             } else {
                 const [ins] = await pool.query(`
-                    INSERT INTO estaciones
-                        (nombre, marca, direccion, latitud, longitud, region, comuna, horario, 
-                         tiene_bano, tiene_tienda, tiene_lubricentro, tiene_cajero, tiene_aire, tiene_lavado,
-                         cne_id, ultima_sync_cne)
+                    INSERT INTO estaciones (nombre, marca, direccion, latitud, longitud, region, comuna, horario, tiene_bano, tiene_tienda, tiene_lubricentro, tiene_cajero, tiene_aire, tiene_lavado, cne_id, ultima_sync_cne)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
                 `, datos);
                 estacionId = ins.insertId;
@@ -113,37 +105,42 @@ const syncEstaciones = async () => {
 
                     if (tipoInterno.length === 0) continue;
 
+                    // 1. Verificar último precio para ver si se guarda en HISTORIAL (Estadísticas)
                     const [ultimo] = await pool.query(`
                         SELECT precio FROM historial_precios
                         WHERE estacion_id = ? AND tipo_combustible_id = ?
                         ORDER BY fecha_registro DESC LIMIT 1
                     `, [estacionId, tipoInterno[0].id]);
 
-                    if (ultimo.length && parseFloat(ultimo[0].precio) === precioActual) continue;
+                    if (!ultimo.length || parseFloat(ultimo[0].precio) !== precioActual) {
+                        await pool.query(`
+                            INSERT INTO historial_precios (estacion_id, tipo_combustible_id, precio, fecha_registro, fuente)
+                            VALUES (?, ?, ?, NOW(), 'cne_v4')
+                        `, [estacionId, tipoInterno[0].id, precioActual]);
+                        preciosCont++;
+                    }
 
+                    // 2. ACTUALIZAR SIEMPRE la tabla precios_actuales (Elimina duplicados de raíz)
                     await pool.query(`
-                        INSERT INTO historial_precios (estacion_id, tipo_combustible_id, precio, fecha_registro, fuente)
-                        VALUES (?, ?, ?, NOW(), 'cne_v4')
+                        INSERT INTO precios_actuales (estacion_id, tipo_combustible_id, precio, fuente)
+                        VALUES (?, ?, ?, 'cne_v4')
+                        ON DUPLICATE KEY UPDATE 
+                            precio = VALUES(precio), 
+                            fecha_actualizacion = NOW(),
+                            fuente = VALUES(fuente)
                     `, [estacionId, tipoInterno[0].id, precioActual]);
-                    preciosCont++;
                 }
             }
 
-            // Log de progreso cada 200 estaciones para no llenar la consola pero ver que avanza
-            if (procesadas % 200 === 0) {
-                console.log(` [CNE] Progreso: ${procesadas}/${totalCNE} estaciones procesadas...`);
-            }
+            if (procesadas % 500 === 0) console.log(` [CNE] Progreso: ${procesadas}/${totalCNE}...`);
         }
 
-        console.log(' --- RESUMEN FINAL CNE ---');
-        console.log(` Estaciones Totales: ${totalCNE}`);
-        console.log(` Nuevas Insertadas: ${insertadas}`);
-        console.log(` Datos Actualizados: ${actualizadas}`);
-        console.log(` Precios Nuevos/Cambiados: ${preciosCont}`);
-        console.log(' --------------------------');
+        console.log(' --- SYNC FINALIZADA ---');
+        console.log(` Estaciones: ${insertadas} nuevas, ${actualizadas} actualizadas.`);
+        console.log(` Precios: ${preciosCont} cambios registrados.`);
 
     } catch (err) {
-        console.error(' [CNE] Error crítico en Sync:', err.message);
+        console.error(' [CNE] Error crítico:', err.message);
     }
 };
 

@@ -18,15 +18,20 @@ class AlertasService {
   }) async {
     await ApiService.post(ApiConfig.alertas, {
       'tipo_combustible_id': tipoCombustibleId,
-      'precio_umbral'      : precioUmbral,
-      'radio_km'           : radioKm,
-      'latitud_usuario'    : lat,
-      'longitud_usuario'   : lng,
+      'precio_umbral': precioUmbral,
+      'radio_km': radioKm,
+      'latitud_usuario': lat,
+      'longitud_usuario': lng,
       if (estacionId != null) 'estacion_id': estacionId,
     });
   }
 
-  static Future<void> desactivarAlerta(int id) async {
+  // Este método dispara la eliminación lógica en tu controller de Node
+  static Future<void> eliminarAlerta(int id) async {
     await ApiService.delete('${ApiConfig.alertas}/$id');
+  }
+
+  static Future<void> toggleEstado(int id, bool activa) async {
+    await ApiService.put('${ApiConfig.alertas}/$id', {'activa': activa ? 1 : 0});
   }
 }

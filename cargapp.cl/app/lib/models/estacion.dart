@@ -13,10 +13,14 @@ class Combustible {
 
   factory Combustible.fromJson(Map<String, dynamic> json) {
     return Combustible(
-      nombre        : json['combustible'] ?? '',
-      categoria     : json['categoria']   ?? '',
-      precio        : double.tryParse(json['precio'].toString()) ?? 0,
-      fechaRegistro : DateTime.parse(json['fecha_registro']),
+      nombre: json['combustible'] ?? '',
+      categoria: json['categoria'] ?? '',
+      precio: double.tryParse(json['precio'].toString()) ?? 0,
+      fechaRegistro: json['fecha_registro'] != null 
+          ? DateTime.parse(json['fecha_registro']) 
+          : (json['fecha_actualizacion'] != null 
+              ? DateTime.parse(json['fecha_actualizacion']) 
+              : DateTime.now()),
     );
   }
 }
@@ -48,26 +52,26 @@ class Estacion {
 
   factory Estacion.fromJson(Map<String, dynamic> json) {
     return Estacion(
-      id          : json['id'],
-      nombre      : json['nombre']    ?? '',
-      marca       : json['marca']     ?? '',
-      direccion   : json['direccion'] ?? '',
-      comuna      : json['comuna']    ?? '',
-      region      : json['region']    ?? '',
-      latitud     : double.tryParse(json['latitud'].toString())  ?? 0,
-      longitud    : double.tryParse(json['longitud'].toString()) ?? 0,
-      distanciaKm : double.tryParse(json['distancia_km'].toString()) ?? 0,
+      id: json['id'],
+      nombre: json['nombre'] ?? '',
+      marca: json['marca'] ?? '',
+      direccion: json['direccion'] ?? '',
+      comuna: json['comuna'] ?? '',
+      region: json['region'] ?? '',
+      latitud: double.tryParse(json['latitud'].toString()) ?? 0,
+      longitud: double.tryParse(json['longitud'].toString()) ?? 0,
+      // Usamos 'distancia' ya que así lo nombramos en el SQL (distanciaKm en el modelo)
+      distanciaKm: double.tryParse(json['distancia']?.toString() ?? '0') ?? 0,
       combustibles: (json['combustibles'] as List? ?? [])
           .map((c) => Combustible.fromJson(c))
           .toList(),
     );
   }
 
-  // Obtener precio de un combustible específico
   double? getPrecio(String nombreCombustible) {
     try {
       return combustibles
-          .firstWhere((c) => c.nombre.contains(nombreCombustible))
+          .firstWhere((c) => c.nombre.toLowerCase().contains(nombreCombustible.toLowerCase()))
           .precio;
     } catch (_) {
       return null;

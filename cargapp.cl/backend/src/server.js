@@ -7,6 +7,7 @@ const cron = require('node-cron')
 const { syncEstaciones } = require('./jobs/syncCNE')
 const { syncDescuentos } = require('./jobs/syncDescuentos')
 const { verificarAlertas } = require('./controllers/alertasController')
+const { syncVehiculos } = require('./jobs/syncVehiculos')
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor CargApp corriendo en http://localhost:${PORT}`)
@@ -17,6 +18,7 @@ app.listen(PORT, '0.0.0.0', () => {
     .catch(err => console.error("Error en sync inicial:", err));
     
   syncDescuentos();
+
 })
 
 // Tarea programada: Sincronizar precios cada dia a las 3 AM
@@ -29,4 +31,10 @@ cron.schedule('0 3 * * *', () => {
 cron.schedule('0 4 * * 1', () => {
   console.log('Cron: ejecutando actualización de descuentos semanal...');
   syncDescuentos()
+})
+
+// Tarea programada: Sincronizar catálogo de vehículos cada domingo a las 5 AM
+cron.schedule('0 5 * * 0', () => {
+  console.log('Cron: ejecutando actualización de catálogo de vehículos semanal...');
+  syncVehiculos();
 })

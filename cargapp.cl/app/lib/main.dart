@@ -5,7 +5,7 @@ import 'screens/auth/login_screen.dart';
 import 'screens/mapa/mapa_screen.dart';
 import 'screens/alertas/alertas_screen.dart';
 import 'screens/descuentos/descuentos_screen.dart';
-import 'screens/reportes/reportes_screen.dart';
+import 'screens/gas/gas_screen.dart'; // Import nuevo
 import 'screens/perfil/perfil_screen.dart';
 
 void main() {
@@ -61,7 +61,7 @@ class _MainScreenState extends State<MainScreen> {
     const MapaScreen(),
     const AlertasScreen(),
     const DescuentosScreen(),
-    const ReportesScreen(),
+    const GasScreen(), // Cambio de Reportes por Gas
     const PerfilScreen(),
   ];
 
@@ -91,9 +91,9 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Descuentos',
           ),
           NavigationDestination(
-            icon: Icon(Icons.campaign_outlined),
-            selectedIcon: Icon(Icons.campaign),
-            label: 'Reportes',
+            icon: Icon(Icons.local_fire_department_outlined),
+            selectedIcon: Icon(Icons.local_fire_department),
+            label: 'Gas GLP',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),

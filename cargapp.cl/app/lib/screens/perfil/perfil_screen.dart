@@ -293,7 +293,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        _buildInfoRow(Icons.star_rounded, 'Reputación', usuario.reputacion.toString()),
+                         //--- _buildInfoRow(Icons.star_rounded, 'Reputación', usuario.reputacion.toString()),---
                         const Divider(height: 24),
                         Row(
                           children: [

@@ -105,22 +105,7 @@ const syncEstaciones = async () => {
 
                     if (tipoInterno.length === 0) continue;
 
-                    // 1. Verificar último precio para ver si se guarda en HISTORIAL (Estadísticas)
-                    const [ultimo] = await pool.query(`
-                        SELECT precio FROM historial_precios
-                        WHERE estacion_id = ? AND tipo_combustible_id = ?
-                        ORDER BY fecha_registro DESC LIMIT 1
-                    `, [estacionId, tipoInterno[0].id]);
-
-                    if (!ultimo.length || parseFloat(ultimo[0].precio) !== precioActual) {
-                        await pool.query(`
-                            INSERT INTO historial_precios (estacion_id, tipo_combustible_id, precio, fecha_registro, fuente)
-                            VALUES (?, ?, ?, NOW(), 'cne_v4')
-                        `, [estacionId, tipoInterno[0].id, precioActual]);
-                        preciosCont++;
-                    }
-
-                    // 2. ACTUALIZAR SIEMPRE la tabla precios_actuales (Elimina duplicados de raíz)
+                    // ACTUALIZAR SIEMPRE la tabla precios_actuales (Elimina duplicados)
                     await pool.query(`
                         INSERT INTO precios_actuales (estacion_id, tipo_combustible_id, precio, fuente)
                         VALUES (?, ?, ?, 'cne_v4')
@@ -129,6 +114,8 @@ const syncEstaciones = async () => {
                             fecha_actualizacion = NOW(),
                             fuente = VALUES(fuente)
                     `, [estacionId, tipoInterno[0].id, precioActual]);
+                    
+                    preciosCont++;
                 }
             }
 
@@ -137,7 +124,7 @@ const syncEstaciones = async () => {
 
         console.log(' --- SYNC FINALIZADA ---');
         console.log(` Estaciones: ${insertadas} nuevas, ${actualizadas} actualizadas.`);
-        console.log(` Precios: ${preciosCont} cambios registrados.`);
+        console.log(` Precios procesados: ${preciosCont}`);
 
     } catch (err) {
         console.error(' [CNE] Error crítico:', err.message);

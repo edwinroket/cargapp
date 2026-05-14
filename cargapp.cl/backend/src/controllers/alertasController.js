@@ -66,7 +66,7 @@ const crearAlerta = async (req, res) => {
     }
 };
 
-// 5. Función para el CRON JOB mejorada (Verificación con ubicación)
+// 5. Función para el CRON JOB (Verificación con precios_actuales)
 const verificarAlertas = async () => {
     console.log('--- [SISTEMA] Verificando alertas activas ---');
     try {
@@ -78,26 +78,24 @@ const verificarAlertas = async () => {
         `);
 
         for (const alerta of alertas) {
-            // Buscamos si hay precios bajos en la zona o estación específica
-            // Se une con estaciones para obtener nombre y dirección para la notificación
+            // Se usa precios_actuales para evitar errores de tabla inexistente
             const [resultado] = await pool.query(`
-                SELECT hp.precio, e.nombre as estacion_nombre, e.direccion, e.id as estacion_id
-                FROM historial_precios hp
-                JOIN estaciones e ON e.id = hp.estacion_id
-                WHERE hp.tipo_combustible_id = ? 
-                  AND hp.precio <= ?
+                SELECT pa.precio, e.nombre as estacion_nombre, e.direccion, e.id as estacion_id
+                FROM precios_actuales pa
+                JOIN estaciones e ON e.id = pa.estacion_id
+                WHERE pa.tipo_combustible_id = ? 
+                  AND pa.precio <= ?
                   AND ( ? IS NULL OR e.id = ? )
-                ORDER BY hp.fecha_registro DESC LIMIT 1
+                ORDER BY pa.fecha_actualizacion DESC LIMIT 1
             `, [alerta.tipo_combustible_id, alerta.precio_umbral, alerta.estacion_id, alerta.estacion_id]);
 
             if (resultado.length > 0) {
                 const res = resultado[0];
                 console.log(`¡MATCH! Usuario ${alerta.usuario_id}: ${res.estacion_nombre} ($${res.precio})`);
                 
-                // Actualizar última notificación para no repetir avisos inmediatamente
                 await pool.query('UPDATE alertas SET ultima_notificacion = NOW() WHERE id = ?', [alerta.id]);
                 
-                // AQUÍ: Integración con FCM (Firebase Cloud Messaging) en el futuro
+                // Integración FCM futura aquí
             }
         }
     } catch (err) {

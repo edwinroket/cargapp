@@ -18,8 +18,14 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
   String _tipoSeleccionado = 'Todos';
 
   final List<String> _tiposFiltro = [
-    'Todos', 'Tarjetas Bancarias', 'App / Digital', 'Tarjetas Retail', 
-    'RUT / Municipal', 'Cajas de Compensación', 'Otro'
+    'Todos', 
+    'Tarjetas Bancarias', 
+    'App / Digital', 
+    'Tarjetas Retail', 
+    'RUT / Municipal', 
+    'App transporte',
+    'Cajas de Compensación', 
+    'Otro'
   ];
 
   final List<String> _bencineras = ['Todas', 'Copec', 'Shell', 'Aramco'];
@@ -33,6 +39,9 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
   
   late Set<String> _conveniosSeleccionados;
   late Future<List<dynamic>> _futureDescuentos;
+
+  // Color verde corporativo extraído de tus vistas oficiales
+  final Color _greenCorporate = const Color(0xFF22c55e);
 
   @override
   void initState() {
@@ -55,24 +64,22 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
     }
   }
 
-  List<dynamic> _filtrar(List<dynamic> lista) {
+  List<dynamic> _filtrar(List<dynamic> lista) { 
     return lista.where((d) {
-      // FILTRO: Ocultar si el descuento es 0 o nulo
       final double descNum = double.tryParse(d['descuento_num']?.toString() ?? '0') ?? 0;
-      if (descNum <= 0) return false;
+      final String descTexto = (d['descuento_texto'] ?? '').toString().trim();
+      
+      if (descNum <= 0 && descTexto.isEmpty) return false;
 
-      final convenio = (d['convenio'] ?? '').toString();
-      final origen = (d['origen'] ?? '').toString();
+      final origen = (d['origen'] ?? '').toString().toLowerCase();
       final dia = (d['dia'] ?? '').toString().toLowerCase();
-      final tipo = (d['tipo'] ?? '').toString();
+      final categoriaVisual = (d['categoria_visual'] ?? 'Otro').toString();
 
-      final matchConvenio = _conveniosSeleccionados.any(
-          (c) => convenio.toLowerCase().contains(c.toLowerCase()));
-      final matchOrigen = _origen == 'Todas' || origen.toLowerCase() == _origen.toLowerCase();
+      final matchOrigen = _origen == 'Todas' || origen == _origen.toLowerCase();
       final matchDia = _dia == 'Semana' || dia.contains(_dia.toLowerCase()) || dia.contains('todos');
-      final matchTipo = _tipoSeleccionado == 'Todos' || tipo == _tipoSeleccionado;
+      final matchTipo = _tipoSeleccionado == 'Todos' || categoriaVisual == _tipoSeleccionado;
 
-      return matchConvenio && matchOrigen && matchDia && matchTipo;
+      return matchOrigen && matchDia && matchTipo;
     }).toList();
   }
 
@@ -95,6 +102,8 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
     final url = d['fuente_url'] ?? '';
     final dia = d['dia'] ?? '';
 
+    final bool esNumerico = d['descuento_num'] != null && descLitro != '0';
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -102,7 +111,7 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
       builder: (context) => Container(
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
-          color: Color(0xFF111827),
+          color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SingleChildScrollView(
@@ -116,11 +125,11 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text("$origen: $convenio", 
-                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(color: Color(0xFF1e293b), fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white54),
+                    icon: const Icon(Icons.close, color: Colors.black45),
                     onPressed: () => Navigator.pop(context),
                   )
                 ],
@@ -130,9 +139,9 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1e293b),
+                  color: const Color(0xFFf8fafc),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF334155)),
+                  border: Border.all(color: const Color(0xFFe2e8f0)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -140,17 +149,23 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('AHORRO ESTIMADO', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold)),
-                        Text('\$${ahorro.toInt()}', 
-                          style: const TextStyle(color: Color(0xFF22c55e), fontSize: 32, fontWeight: FontWeight.bold)),
+                        const Text('AHORRO ESTIMADO', style: TextStyle(color: Colors.black54, fontSize: 11, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Text(
+                          esNumerico ? '\$${ahorro.toInt()}' : 'Institucional', 
+                          style: TextStyle(color: _greenCorporate, fontSize: esNumerico ? 32 : 22, fontWeight: FontWeight.bold)
+                        ),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Text('POR LITRO', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold)),
-                        Text('\$$descLitro', 
-                          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                        const Text('VALOR', style: TextStyle(color: Colors.black54, fontSize: 11, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Text(
+                          esNumerico ? '\$$descLitro/lt' : 'Convenio', 
+                          style: const TextStyle(color: Color(0xFF1e293b), fontSize: 24, fontWeight: FontWeight.bold)
+                        ),
                       ],
                     ),
                   ],
@@ -167,7 +182,7 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
               ],
 
               _buildSectionTitle('📜 CONDICIONES (TEXTO OFICIAL)'),
-              _buildSectionContent(condicion),
+              _buildSectionContent(condicion.isNotEmpty ? condicion : d['descuento_texto'] ?? 'Revisar detalles en fuente oficial.'),
 
               if (notas.isNotEmpty) ...[
                 _buildSectionTitle('💡 NOTAS ADICIONALES'),
@@ -189,7 +204,7 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
                     icon: const Icon(Icons.link, size: 18),
                     label: const Text('VER FUENTE OFICIAL', style: TextStyle(fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF16a34a),
+                      backgroundColor: _greenCorporate,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -207,29 +222,30 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 4),
-      child: Text(title, style: const TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
+      child: Text(title, style: const TextStyle(color: Colors.black45, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
     );
   }
 
   Widget _buildSectionContent(String content) {
-    return Text(content, style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4));
+    return Text(content, style: const TextStyle(color: Color(0xFF334155), fontSize: 14, height: 1.4));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0f172a),
+      backgroundColor: const Color(0xFFf3f4f6), // Fondo gris suave idéntico a las otras vistas
       appBar: AppBar(
         title: const Text('Descuentos en Bencina',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFF0f172a),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+        backgroundColor: _greenCorporate, // Barra verde sólida oficial
         elevation: 0,
+        centerTitle: false,
       ),
       body: FutureBuilder<List<dynamic>>(
         future: _futureDescuentos,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFF22c55e)));
+            return Center(child: CircularProgressIndicator(color: _greenCorporate));
           }
 
           final lista = snapshot.data ?? [];
@@ -241,7 +257,7 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
             children: [
               _buildConfigPanel(),
               const SizedBox(height: 20),
-              ...filtrada.map((d) => _buildDescuentoCard(d)).toList(),
+              ...filtrada.map((d) => _buildDescuentoCard(d)),
             ],
           );
         },
@@ -256,14 +272,24 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
     final convenio = d['convenio'] ?? 'Convenio';
     final dia = d['dia'] ?? '';
 
+    final bool esNumerico = descPorLitro != '0' && d['descuento_num'] != null;
+
     return GestureDetector(
       onTap: () => _mostrarDetalle(context, d),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1e293b),
+          color: Colors.white, // Tarjetas blancas unificadas
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF334155)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              spreadRadius: 1,
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          border: Border.all(color: const Color(0xFFe5e7eb)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,10 +303,10 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
                     children: [
                       _buildMarcaBadge(origen),
                       const SizedBox(width: 8),
-                      Text(origen, style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
+                      Text(origen, style: const TextStyle(color: Colors.black54, fontSize: 12, fontWeight: FontWeight.bold)),
                     ],
                   ),
-                  Text(dia, style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                  Text(dia, style: const TextStyle(color: Colors.black38, fontSize: 12)),
                 ],
               ),
             ),
@@ -293,34 +319,54 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Hasta \$$descPorLitro/lt',
-                          style: const TextStyle(color: Color(0xFF22c55e), fontSize: 24, fontWeight: FontWeight.w900)),
+                        Text(
+                          esNumerico ? 'Hasta \$$descPorLitro/lt' : (d['descuento_texto'] ?? 'Beneficio Especial'),
+                          style: TextStyle(
+                            color: _greenCorporate, 
+                            fontSize: esNumerico ? 24 : 15, 
+                            fontWeight: FontWeight.w900
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         const SizedBox(height: 4),
-                        Text(convenio, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                        Text(convenio, style: const TextStyle(color: Color(0xFF1e293b), fontSize: 16, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(color: const Color(0xFF0f172a), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: const Color(0xFFf1f5f9), borderRadius: BorderRadius.circular(12)),
                     child: Column(
                       children: [
-                        const Text('AHORRO TOTAL', style: TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold)),
-                        Text('\$${ahorroTotal.toInt()}', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(
+                          esNumerico ? 'AHORRO TOTAL' : 'CONVENIO', 
+                          style: const TextStyle(color: Colors.black45, fontSize: 9, fontWeight: FontWeight.bold)
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          esNumerico ? '\$${ahorroTotal.toInt()}' : '📋 Ver Info', 
+                          style: TextStyle(
+                            color: esNumerico ? const Color(0xFF1e293b) : const Color(0xFF0284c7), 
+                            fontSize: esNumerico ? 18 : 12, 
+                            fontWeight: FontWeight.bold
+                          )
+                        ),
                       ],
                     ),
                   )
                 ],
               ),
             ),
-            const Divider(color: Color(0xFF334155), height: 1, indent: 16, endIndent: 16),
+            const Divider(color: Color(0xFFf1f5f9), height: 1, indent: 16, endIndent: 16),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(d['tipo'] ?? '', style: const TextStyle(color: Colors.white38, fontSize: 11)),
-                  const Icon(Icons.arrow_forward_ios, color: Colors.white38, size: 12),
+                  Text(d['categoria_visual'] ?? 'Otro', style: const TextStyle(color: Colors.black45, fontSize: 11)),
+                  const Icon(Icons.arrow_forward_ios, color: Colors.black38, size: 12),
                 ],
               ),
             ),
@@ -331,12 +377,23 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
   }
 
   Widget _buildConfigPanel() {
+    final Map<String, String> emojisCategorias = {
+      'Todos': '✨ Todas',
+      'Tarjetas Bancarias': '🏦 Tarjetas Bancarias',
+      'App / Digital': '📱 App / Digital',
+      'Tarjetas Retail': '🛍️ Tarjetas Retail',
+      'RUT / Municipal': '🏛️ RUT / Municipal',
+      'App transporte': '🚗 App transporte',
+      'Cajas de Compensación': '📋 Cajas de Compensación',
+      'Otro': '🏷️ Otro'
+    };
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1e293b),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF334155)),
+        border: Border.all(color: const Color(0xFFe5e7eb)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,8 +401,8 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('¿CUÁNTO CARGAS?', style: TextStyle(color: Colors.white54, fontSize: 11)),
-              Text('\$ ${_montoCarga.toInt()}', style: const TextStyle(color: Color(0xFF22c55e), fontWeight: FontWeight.bold, fontSize: 16)),
+              const Text('¿CUÁNTO CARGAS?', style: TextStyle(color: Colors.black54, fontSize: 11, fontWeight: FontWeight.bold)),
+              Text('\$ ${_montoCarga.toInt()}', style: TextStyle(color: _greenCorporate, fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
           Slider(
@@ -353,10 +410,11 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
             min: 5000,
             max: 100000,
             divisions: 19,
-            activeColor: const Color(0xFF22c55e),
+            activeColor: _greenCorporate,
+            inactiveColor: const Color(0xFFe5e7eb),
             onChanged: (value) => setState(() => _montoCarga = value),
           ),
-          const Text('BENCINERA', style: TextStyle(color: Colors.white54, fontSize: 11)),
+          const Text('BENCINERA', style: TextStyle(color: Colors.black54, fontSize: 11, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -367,14 +425,37 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
                   label: Text(o, style: const TextStyle(fontSize: 12)),
                   selected: _origen == o,
                   onSelected: (val) => setState(() => _origen = o),
-                  selectedColor: const Color(0xFF16a34a),
-                  backgroundColor: const Color(0xFF0f172a),
-                  labelStyle: TextStyle(color: _origen == o ? Colors.white : Colors.white70),
+                  selectedColor: _greenCorporate,
+                  backgroundColor: const Color(0xFFf3f4f6),
+                  labelStyle: TextStyle(color: _origen == o ? Colors.white : Colors.black54, fontWeight: FontWeight.w600),
                 ),
               )).toList(),
             ),
           ),
           const SizedBox(height: 15),
+
+          const Text('TIPO DE DESCUENTO', style: TextStyle(color: Colors.black54, fontSize: 11, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: _tiposFiltro.map((tipo) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(
+                  label: Text(emojisCategorias[tipo] ?? tipo, style: const TextStyle(fontSize: 12)),
+                  selected: _tipoSeleccionado == tipo,
+                  onSelected: (val) {
+                    setState(() => _tipoSeleccionado = tipo);
+                  },
+                  selectedColor: _greenCorporate, // Usamos el mismo verde para mantener la sobriedad
+                  backgroundColor: const Color(0xFFf3f4f6),
+                  labelStyle: TextStyle(color: _tipoSeleccionado == tipo ? Colors.white : Colors.black54, fontWeight: FontWeight.w600),
+                ),
+              )).toList(),
+            ),
+          ),
+          const SizedBox(height: 15),
+
           Row(children: [
             Expanded(child: _dropdownDark(value: _bencina, items: ['93', '95', '97', 'Diésel'], onChanged: (v) => setState(() => _bencina = v!))),
             const SizedBox(width: 10),
@@ -396,8 +477,8 @@ class _DescuentosScreenState extends State<DescuentosScreen> {
   Widget _dropdownDark({required String value, required List<String> items, required void Function(String?) onChanged}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(color: const Color(0xFF0f172a), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFF334155))),
-      child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: value, items: items.map((i) => DropdownMenuItem(value: i, child: Text(i, style: const TextStyle(color: Colors.white, fontSize: 13)))).toList(), onChanged: onChanged, dropdownColor: const Color(0xFF1e293b), isExpanded: true)),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFcbd5e1))),
+      child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: value, items: items.map((i) => DropdownMenuItem(value: i, child: Text(i, style: const TextStyle(color: Color(0xFF1e293b), fontSize: 13, fontWeight: FontWeight.w600)))).toList(), onChanged: onChanged, dropdownColor: Colors.white, isExpanded: true, iconEnabledColor: Colors.black54)),
     );
   }
 }

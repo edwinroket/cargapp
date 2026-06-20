@@ -100,8 +100,8 @@ class _MapaScreenState extends State<MapaScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF16a34a),
-        child: const Icon(Icons.refresh, color: Colors.white),
         onPressed: _cargarEstaciones,
+        child: const Icon(Icons.refresh, color: Colors.white),
       ),
     );
   }

@@ -114,7 +114,7 @@ class _GasScreenState extends State<GasScreen> with SingleTickerProviderStateMix
           left: 10,
           right: 10,
           child: Card(
-            color: Colors.amber.shade50.withOpacity(0.95),
+            color: Colors.amber.shade50.withValues(alpha: 0.95),
             elevation: 3,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             child: const Padding(

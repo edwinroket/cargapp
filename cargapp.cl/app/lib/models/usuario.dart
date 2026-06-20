@@ -28,7 +28,7 @@ class Usuario {
       id        : json['id'],
       email     : json['email']      ?? '',
       nombre    : json['nombre']     ?? json['nombre_completo'],
-      telefono  : json['telefono'] ?? json['telefono'] ?? null,
+      telefono  : json['telefono'] ?? json['telefono'],
       esPremium : json['premium'] == 1 || json['es_premium'] == 1,
       reputacion: json['reputacion'] ?? json['puntos_reputacion'] ?? 0,
       ciudadId  : json['ciudad_id'],

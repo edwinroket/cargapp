@@ -70,7 +70,7 @@ class _NuevaAlertaScreenState extends State<NuevaAlertaScreen> {
                 return ChoiceChip(
                   label: Text(t['nombre']),
                   selected: _combustibleSeleccionado == t['id'],
-                  selectedColor: const Color(0xFF16a34a).withOpacity(0.2),
+                  selectedColor: const Color(0xFF16a34a).withValues(alpha: 0.2),
                   onSelected: (val) => setState(() => _combustibleSeleccionado = t['id']),
                 );
               }).toList(),

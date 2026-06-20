@@ -12,29 +12,26 @@ const { syncVehiculos } = require('./jobs/syncVehiculos')
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor CargApp corriendo en http://localhost:${PORT}`)
   
-  // Ejecución inicial de sincronización y alertas
-  syncEstaciones()
-    .then(() => verificarAlertas())
-    .catch(err => console.error("Error en sync inicial:", err));
-    
-  syncDescuentos();
+  // Función asíncrona para manejar el encendido seguro
+  const inicializarServicios = async () => {
+    try {
+      console.log("[SISTEMA] Esperando estabilización de servicios...");
+      
+      // 1. Sincronizar Estaciones de la CNE y luego alertas
+      console.log("[SISTEMA] Iniciando sync CNE...");
+      await syncEstaciones();
+      await verificarAlertas();
+      
+      // 2. Sincronizar Descuentos de forma segura
+      console.log("[SISTEMA] Iniciando sync Descuentos...");
+      await syncDescuentos();
+      
+      console.log("[SISTEMA] Sincronizaciones iniciales completadas con éxito.");
+    } catch (err) {
+      console.error("[SISTEMA] Error crítico en la inicialización:", err);
+    }
+  };
 
-})
-
-// Tarea programada: Sincronizar precios cada dia a las 3 AM
-cron.schedule('0 3 * * *', () => {
-  console.log('Cron: ejecutando actualización de precios diaria...');
-  syncEstaciones().then(() => verificarAlertas())
-})
-
-// Tarea programada: Sincronizar descuentos cada lunes a las 4 AM
-cron.schedule('0 4 * * 1', () => {
-  console.log('Cron: ejecutando actualización de descuentos semanal...');
-  syncDescuentos()
-})
-
-// Tarea programada: Sincronizar catálogo de vehículos cada domingo a las 5 AM
-cron.schedule('0 5 * * 0', () => {
-  console.log('Cron: ejecutando actualización de catálogo de vehículos semanal...');
-  syncVehiculos();
+  // Le damos 5 segundos de colchón a MariaDB para que despierte tras un reinicio
+  setTimeout(inicializarServicios, 5000);
 })

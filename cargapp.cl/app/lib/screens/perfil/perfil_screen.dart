@@ -119,7 +119,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                         else
                           DropdownButtonFormField<int>(
                             isExpanded: true,
-                            value: _regionSeleccionada,
+                            initialValue: _regionSeleccionada,
                             decoration: const InputDecoration(labelText: 'Región', border: OutlineInputBorder()),
                             items: _regiones.map((region) {
                               return DropdownMenuItem<int>(
@@ -144,7 +144,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                             ? const Center(child: CircularProgressIndicator())
                             : DropdownButtonFormField<int>(
                                 isExpanded: true,
-                                value: _ciudadSeleccionada,
+                                initialValue: _ciudadSeleccionada,
                                 decoration: const InputDecoration(labelText: 'Ciudad', border: OutlineInputBorder()),
                                 items: _ciudades.map((ciudad) {
                                   return DropdownMenuItem<int>(
@@ -271,7 +271,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => VehiculosScreen()),
+                            MaterialPageRoute(builder: (context) => const VehiculosScreen()),
                           );
                         },
                       ),

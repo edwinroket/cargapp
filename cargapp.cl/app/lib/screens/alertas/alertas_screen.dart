@@ -222,7 +222,7 @@ class _AlertasScreenState extends State<AlertasScreen> {
                   ),
                   Switch(
                     value: estaActiva,
-                    activeColor: const Color(0xFF16a34a),
+                    activeThumbColor: const Color(0xFF16a34a),
                     onChanged: (val) => _toggleAlerta(alerta['id'], val),
                   ),
                   IconButton(

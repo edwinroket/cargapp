@@ -150,7 +150,7 @@ class _EstacionDetalleScreenState extends State<EstacionDetalleScreen> {
                           color: color,
                           barWidth: 3,
                           dotData: const FlDotData(show: true),
-                          belowBarData: BarAreaData(show: true, color: color.withOpacity(0.05)),
+                          belowBarData: BarAreaData(show: true, color: color.withValues(alpha: 0.05)),
                         );
                       }).toList(),
                     ),
@@ -196,8 +196,9 @@ class _EstacionDetalleScreenState extends State<EstacionDetalleScreen> {
 
   Widget _buildOctanajeBadge(String combustible, String precio, String? precioAnterior) {
     String corto = '95';
-    if (combustible.contains('93')) corto = '93';
-    else if (combustible.contains('97')) corto = '97';
+    if (combustible.contains('93')) {
+      corto = '93';
+    } else if (combustible.contains('97')) corto = '97';
     else if (combustible.toLowerCase().contains('di')) corto = 'DI';
     else if (combustible.toLowerCase().contains('ker')) corto = 'KE';
 
@@ -216,7 +217,7 @@ class _EstacionDetalleScreenState extends State<EstacionDetalleScreen> {
         tendenciaColor = Colors.green;
       } else {
         tendenciaIcon = Icons.drag_handle; 
-        tendenciaColor = Colors.blueGrey.withOpacity(0.5);
+        tendenciaColor = Colors.blueGrey.withValues(alpha: 0.5);
       }
     }
 
@@ -287,7 +288,7 @@ class _EstacionDetalleScreenState extends State<EstacionDetalleScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(estacion['direccion']?.toString().trim() ?? '', style: const TextStyle(color: Colors.white, fontSize: 16)),
-                  Text("${estacion['comuna']}, ${estacion['region']}", style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14)),
+                  Text("${estacion['comuna']}, ${estacion['region']}", style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 14)),
                 ],
               ),
             ),
@@ -314,7 +315,7 @@ class _EstacionDetalleScreenState extends State<EstacionDetalleScreen> {
                     p['combustible'], 
                     p['precio'].toString(), 
                     p['precio_anterior']?.toString()
-                  )).toList(),
+                  )),
                   const SizedBox(height: 20),
                   
                   // BOTÓN COMENTADO: por insuficientes datos para graficar
